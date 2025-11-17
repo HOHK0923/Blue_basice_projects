@@ -1,0 +1,4 @@
+index=main source="/var/log/httpd/access_log"
+| bin _time span=1m
+| stats count AS req_count values(uri) AS pages BY clientip _time
+| where req_count >= 10

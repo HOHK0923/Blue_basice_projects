@@ -1,0 +1,125 @@
+<dashboard version="1.1" theme="light">
+  <label>(2) 공격 시도 탐지</label>
+
+  <row>
+    <panel>
+      <title>공격 시도 이벤트 수 (최근 24시간)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype=access_combined status>=400
+| stats count AS "공격 시도 수 (최근 24시간)"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="colorBy">value</option>
+        <option name="colorMode">none</option>
+        <option name="drilldown">none</option>
+        <option name="numberPrecision">0</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>공격 IP Top 10 (최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined status>=400
+| where isnotnull(clientip) AND clientip!=""
+| stats count as 공격시도수 by clientip
+| sort - 공격시도수
+| head 10
+| rename clientip AS IP</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">bar</option>
+        <option name="charting.axisTitleX.text">IP</option>
+        <option name="charting.axisTitleY.text">공격시도수</option>
+        <option name="charting.legend.mode">none</option>
+      </chart>
+    </panel>
+
+    <panel>
+      <title>HTTP 상태코드 분포 (최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined
+| stats count by status
+| sort - count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">pie</option>
+        <option name="charting.legend.mode">standard</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>시간대별 공격 시도 추이 (최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined status>=400
+| timechart span=1h count as 공격시도수</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.axisTitleX.text">시간</option>
+        <option name="charting.axisTitleY.text">공격시도수</option>
+        <option name="charting.legend.mode">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>의심 URI 상위 10 (최근 24시간)</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=access_combined status>=400
+| where isnotnull(uri_path) AND uri_path!=""
+| stats count as hits by uri_path
+| sort - hits
+| head 10
+| rename uri_path AS "URI", hits AS "요청수"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="displayRowNumbers">1</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>최근 의심 로그인 시도 (로그 상위 20)</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=access_combined uri_path="/login.php"
+| eval scode=tonumber(status)
+| where scode>=400
+| stats count as 실패횟수 values(user) as 사용자 values(clientip) as IP by uri_path, _time
+| sort - 실패횟수
+| head 20</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="displayRowNumbers">1</option>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>

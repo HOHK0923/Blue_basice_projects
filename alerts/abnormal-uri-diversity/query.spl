@@ -1,0 +1,10 @@
+index=main source="/var/log/httpd/access_log"
+| eval is_webshell = if(method="GET" AND like(uri, "%file.php%"), 1, 0)
+| bin _time span=1m
+| stats
+    max(is_webshell) AS used_webshell
+    dc(uri) AS unique_uri
+    count AS total_req
+    values(uri) AS pages
+  BY clientip _time
+| where used_webshell = 1 AND (unique_uri >= 3 OR total_req >= 40)

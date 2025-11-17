@@ -1,0 +1,38 @@
+{
+  "username": "Splunk Alert",
+  "embeds": [
+    {
+      "title": "🚨 웹쉘 업로드 & 실행 징후 탐지",
+      "color": 16711680,
+      "fields": [
+        {
+          "name": "📌 공격 IP",
+          "value": "$result.clientip$"
+        },
+        {
+          "name": "⏱️ 탐지 시간(15분 구간)",
+          "value": "$result._time$"
+        },
+        {
+          "name": "📤 업로드 시도 횟수",
+          "value": "$result.upload_hits$"
+        },
+        {
+          "name": "📥 웹쉘 호출 횟수",
+          "value": "$result.webshell_hits$"
+        },
+        {
+          "name": "📑 요청된 페이지들",
+          "value": "```$result.pages$```"
+        },
+        {
+          "name": "📊 전체 요청 수",
+          "value": "$result.req_count$"
+        }
+      ],
+      "footer": {
+        "text": "Splunk Webshell Detection Alert"
+      }
+    }
+  ]
+}

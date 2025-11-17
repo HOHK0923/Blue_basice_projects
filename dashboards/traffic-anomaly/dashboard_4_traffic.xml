@@ -1,0 +1,156 @@
+<dashboard version="1.1" theme="light">
+  <label>(4) 트래픽 이상 징후 감시</label>
+
+  <row>
+    <panel>
+      <title>전체 트래픽 이벤트 수 (최근 1시간)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-1h latest=now | stats count AS "이벤트 수 (1시간)"</query>
+          <earliest>-1h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="showSparkline">1</option>
+        <option name="showTrendIndicator">1</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>총 전송 바이트 (최근 24시간)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now | eval bytestonum=if(isnum(bytes),bytes,0) | stats sum(bytestonum) AS "총 바이트(24h)"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="numberPrecision">0</option>
+        <option name="useThousandSeparators">1</option>
+      </single>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>시간대별 트래픽 추이 (1시간 간격, 최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now | timechart span=1h count AS events sum(bytes) AS bytes</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.overlayFields">bytes</option>
+        <option name="charting.lineWidth">2</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>상위 요청 엔드포인트 Top 20 (최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now | stats count AS hits BY uri_path | sort -hits | head 20</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">column</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>상위 소스 IP Top 10 (최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now | stats count AS events BY clientip | sort -events | head 10</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>상위 User-Agent (최근 24시간)</title>
+      <table>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now | stats count AS hits BY user_agent | sort -hits | head 10</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>트래픽 발생 국가 Top 10 (최근 7일)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-7d@d latest=now | where isnotnull(clientip) | iplocation clientip | stats count AS events BY Country | sort -events | head 10</query>
+          <earliest>-7d@d</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>이상 트래픽 탐지 (z-score 기반, 최근 24시간)</title>
+      <chart>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now
+| timechart span=1h count AS cnt
+| eventstats avg(cnt) AS mean stdev(cnt) AS sd
+| eval zscore=if(sd&gt;0, round((cnt-mean)/sd,2), 0)
+| eval anomaly=if(zscore&gt;3 OR zscore&lt;-3, "anomaly", "normal")
+| table _time cnt mean sd zscore anomaly</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.overlayFields">zscore</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+
+  <row>
+    <panel>
+      <title>최근 이상 지점(최근 24시간, z&gt;3)</title>
+      <single>
+        <search>
+          <query>index=main sourcetype=access_combined earliest=-24h@h latest=now
+| timechart span=1h count AS cnt
+| eventstats avg(cnt) AS mean stdev(cnt) AS sd
+| eval zscore=if(sd&gt;0,(cnt-mean)/sd,0)
+| where zscore&gt;3
+| stats count AS "이상발생 시점(24h)"</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="numberPrecision">0</option>
+      </single>
+    </panel>
+  </row>
+
+</dashboard>

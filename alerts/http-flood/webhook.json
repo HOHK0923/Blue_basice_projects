@@ -1,0 +1,28 @@
+{
+  "username": "Splunk 경고",
+  "content": "**🚨 High Request Volume Detected**",
+  "embeds": [
+    {
+      "title": "HTTP 플러드(과다 요청) 의심",
+      "color": 15158332,
+      "fields": [
+        {
+          "name": "클라이언트 IP",
+          "value": "$result.clientip$"
+        },
+        {
+          "name": "요청 수 (1분)",
+          "value": "$result.req_count$"
+        },
+        {
+          "name": "요청한 페이지",
+          "value": "$result.pages$"
+        },
+        {
+          "name": "발생 시간",
+          "value": "$result._time$"
+        }
+      ]
+    }
+  ]
+}

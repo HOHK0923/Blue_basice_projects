@@ -1,0 +1,37 @@
+{
+  "username": "Splunk 경고",
+  "content": "**⚠️ Webshell 이후 URI 다변화 의심 탐지**",
+  "embeds": [
+    {
+      "title": "Abnormal Increase in URI Diversity",
+      "description": "웹쉘(file.php) 호출 이후 짧은 시간 내 URI 다변화 / 요청 증가 패턴이 탐지되었습니다.",
+      "color": 15158332,
+      "fields": [
+        {
+          "name": "클라이언트 IP",
+          "value": "$result.clientip$"
+        },
+        {
+          "name": "웹쉘 호출 여부",
+          "value": "$result.used_webshell$"
+        },
+        {
+          "name": "총 요청 수 (2분)",
+          "value": "$result.total_req$"
+        },
+        {
+          "name": "고유 URI 수",
+          "value": "$result.unique_uri$"
+        },
+        {
+          "name": "발생 시각",
+          "value": "$result._time$"
+        },
+        {
+          "name": "URI 목록",
+          "value": "```$result.pages$```"
+        }
+      ]
+    }
+  ]
+}
