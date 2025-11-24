@@ -108,10 +108,11 @@ sudo /opt/splunkforwarder/bin/splunk start --accept-license
 
 ---
 
-## 10. 추천 후속 작업
+## 10. 후속 작업
 
 * Splunk 또는 ELK Stack 연동으로 로그 통합 시각화
 * 이상 징후 자동 알림 (Webhook, 이메일, Slack 등)
 * 정기 점검 스크립트(`cron` 활용) 작성
 
 ```
+
